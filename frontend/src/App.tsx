@@ -88,6 +88,7 @@ const MainLayout = () => {
   const { isSignedIn } = useCurrentUser();
   const hideHeader = ['/onboard', '/login', '/register'].includes(location.pathname);
   const showNav = isSignedIn && !hideHeader;
+  const isAuthPage = hideHeader;
 
   return (
     <div className="min-h-screen bg-[#F5F0E8] dark:bg-[#1E1B15] text-[#2C2518] dark:text-[#EFECE6] flex flex-col md:flex-row transition-colors duration-200">
@@ -96,7 +97,11 @@ const MainLayout = () => {
       <div className={`flex-1 flex flex-col min-h-screen overflow-x-hidden relative ${showNav ? 'md:pl-64' : ''}`}>
         {isSignedIn && !hideHeader && <TopHeader />}
         
-        <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-5 pb-[92px] md:pb-8">
+        <main className={`flex-1 w-full ${
+          isAuthPage
+            ? 'p-0'
+            : 'px-4 sm:px-6 lg:px-8 py-5 pb-[92px] md:pb-8'
+        }`}>
           <Routes>
             {/* Public / Auth paths */}
             <Route path="/" element={<Home />} />
