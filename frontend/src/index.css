@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-bold text-text-light dark:text-text-dark;
+  }
+  body {
+    @apply font-body bg-[#F5F0E8] text-[#2C2518] antialiased;
+  }
+}
+
+/* Premium Card Shadows and Borders */
+.shadow-premium {
+  box-shadow: 0 2px 16px rgba(212, 168, 67, 0.06);
+}
+
+.shadow-premium-hover {
+  box-shadow: 0 8px 24px rgba(212, 168, 67, 0.12);
+}
+
+/* Shimmer skeleton loader effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #efeae1 25%, #eae2d3 50%, #efeae1 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.dark .shimmer {
+  background: linear-gradient(90deg, #2a251d 25%, #3a342b 50%, #2a251d 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* FAB Idle Pulse Ring Animation */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(212, 168, 67, 0.5);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(212, 168, 67, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(212, 168, 67, 0);
+  }
+}
+
+.fab-pulse {
+  animation: pulse-ring 2s infinite;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #E6DFD3;
+  border-radius: 99px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #3A342B;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #D4A843;
+}
