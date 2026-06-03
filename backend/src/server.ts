@@ -25,11 +25,25 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
+// Build allowed origins list from env + hardcoded production URL
+const allowedOrigins = [
+  'http://localhost:5173', // Vite dev server
+  'http://localhost:3000',
+  'https://mvgrnexus.vercel.app', // Production frontend
+  ...(process.env.ALLOWED_ORIGIN
+    ? process.env.ALLOWED_ORIGIN.split(',').map((o) => o.trim())
+    : []),
+];
+
 app.use(cors({
-  origin: [
-    process.env.ALLOWED_ORIGIN || 'http://localhost:3000',
-    'http://localhost:5173', // Vite development server
-  ],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error(`CORS: Origin ${origin} not allowed`));
+  },
   credentials: true
 }));
 
