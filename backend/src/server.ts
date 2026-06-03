@@ -25,9 +25,11 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
-const allowedOrigin = process.env.ALLOWED_ORIGIN || 'http://localhost:3000';
 app.use(cors({
-  origin: allowedOrigin,
+  origin: [
+    process.env.ALLOWED_ORIGIN || 'http://localhost:3000',
+    'http://localhost:5173', // Vite development server
+  ],
   credentials: true
 }));
 
