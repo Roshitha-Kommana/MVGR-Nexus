@@ -1,13 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Dancing+Script:wght@400..700&family=Lora:ital,wght@0,400..700;1,400..700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+.font-heading {
+  font-family: 'Cormorant Garamond', serif !important;
+}
+.font-body {
+  font-family: 'Lora', serif !important;
+}
+.font-sans {
+  font-family: 'DM Sans', sans-serif !important;
+}
+.font-cursive {
+  font-family: 'Dancing Script', cursive !important;
+}
+
 @layer base {
   h1, h2, h3, h4, h5, h6 {
-    @apply font-heading font-bold text-text-light dark:text-text-dark;
+    font-family: 'Cormorant Garamond', serif;
+    @apply font-bold text-text-light dark:text-text-dark;
   }
   body {
-    @apply font-body bg-[#F5F0E8] text-[#2C2518] antialiased;
+    font-family: 'DM Sans', sans-serif;
+    @apply bg-background text-text-light dark:bg-background-dark dark:text-text-dark antialiased;
   }
 }
 
@@ -31,13 +48,13 @@
 }
 
 .shimmer {
-  background: linear-gradient(90deg, #efeae1 25%, #eae2d3 50%, #efeae1 75%);
+  background: linear-gradient(90deg, #EAE5DB 25%, #E6DFD3 50%, #EAE5DB 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
 
 .dark .shimmer {
-  background: linear-gradient(90deg, #2a251d 25%, #3a342b 50%, #2a251d 75%);
+  background: linear-gradient(90deg, #2A251D 25%, #3A342B 50%, #2A251D 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }

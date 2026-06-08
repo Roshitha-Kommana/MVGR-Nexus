@@ -36,12 +36,14 @@ export default {
         success: '#00B894'
       },
       fontFamily: {
-        heading: ['"Plus Jakarta Sans"', 'sans-serif'],
-        body: ['"DM Sans"', 'sans-serif'],
-        label: ['"DM Sans"', 'sans-serif']
+        heading: ['"Cormorant Garamond"', 'serif'],
+        body: ['"Lora"', 'serif'],
+        sans: ['"DM Sans"', 'sans-serif'],
+        label: ['"DM Sans"', 'sans-serif'],
+        cursive: ['"Dancing Script"', 'cursive']
       },
       boxShadow: {
-        premium: '0 2px 16px rgba(212, 168, 67, 0.06)',
+        premium: '0 4px 20px rgba(212, 168, 67, 0.06)',
         premiumHover: '0 8px 30px rgba(212, 168, 67, 0.12)'
       }
     },

@@ -35,7 +35,9 @@ export const useCurrentUser = () => {
       }
     },
     enabled: isInitialized && isSignedIn && !!supabaseUser?.id,
-    retry: false
+    retry: false,
+    staleTime: 1000 * 60 * 5, // Cache profile as fresh for 5 minutes
+    gcTime: 1000 * 60 * 10    // Keep profile in cache for 10 minutes
   });
 
   const isLoading = !isInitialized || (isSignedIn && isDbLoading);

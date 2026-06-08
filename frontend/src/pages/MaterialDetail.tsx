@@ -343,7 +343,7 @@ export const MaterialDetail = () => {
 
             {/* Description */}
             {material.description && (
-              <div className="p-3.5 bg-[#F5F0E8]/50 dark:bg-[#1E1B15]/30 border border-[#E6DFD3] dark:border-[#3A342B]/40 rounded-xl italic text-xs leading-relaxed text-[#8C8270] dark:text-[#A09685]">
+              <div className="p-3.5 bg-[#F5F0E8]/50 dark:bg-[#1E1B15]/30 border border-[#E6DFD3] dark:border-[#3A342B]/40 rounded-xl italic font-body font-light text-[12.5px] leading-relaxed text-[#8C8270] dark:text-[#A09685]">
                 "{material.description}"
               </div>
             )}
@@ -450,7 +450,7 @@ export const MaterialDetail = () => {
             <button
               onClick={handleDownload}
               disabled={isDownloading}
-              className="w-full py-3.5 px-4 bg-[#D4A843] hover:bg-[#B58B2F] text-white rounded-xl font-heading font-extrabold text-xs.5 tracking-wider transition duration-150 flex items-center justify-center gap-2 hover:scale-[1.01] shadow-md shadow-[#D4A843]/15 disabled:opacity-50"
+              className="w-full py-3.5 px-4 bg-[#D4A843] hover:bg-[#B58B2F] text-white rounded-xl font-heading font-extrabold text-xs tracking-wider transition duration-150 flex items-center justify-center gap-2 hover:scale-[1.01] shadow-md shadow-[#D4A843]/15 disabled:opacity-50"
             >
               {isDownloading ? (
                 <>
@@ -480,7 +480,7 @@ export const MaterialDetail = () => {
 
           {/* Uploader Profile Strip */}
           {uploader && (
-            <div className="border border-[#E6DFD3] dark:border-[#3A342B]/40 bg-white dark:bg-[#2A251D] rounded-2xl p-4.5 shadow-premium flex items-center justify-between">
+            <div className="border border-[#E6DFD3] dark:border-[#3A342B]/40 bg-white dark:bg-[#2A251D] rounded-2xl p-4 shadow-premium flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-[#D4A843]/10 border border-[#D4A843]/20 flex items-center justify-center font-bold text-sm text-[#D4A843] uppercase overflow-hidden shrink-0">
                   {uploader.photoUrl ? (
@@ -491,7 +491,7 @@ export const MaterialDetail = () => {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[9px] text-[#8C8270] dark:text-[#A09685] font-bold uppercase tracking-wider">Uploaded By</span>
-                  <Link to={`/profile/${uploader.supabaseUserId}`} className="text-xs.5 font-bold text-[#2C2518] dark:text-[#EFECE6] hover:text-[#D4A843] transition leading-none mt-0.5">
+                  <Link to={`/profile/${uploader.supabaseUserId}`} className="text-xs font-bold text-[#2C2518] dark:text-[#EFECE6] hover:text-[#D4A843] transition leading-none mt-0.5">
                     {uploader.name}
                   </Link>
                   <div className="mt-1">
@@ -512,7 +512,7 @@ export const MaterialDetail = () => {
                 </div>
               </div>
 
-              <div className="text-right">
+              <div className="text-right shrink-0">
                 <span className="text-sm font-black text-[#2C2518] dark:text-[#EFECE6] block leading-none">{uploader.totalUploads}</span>
                 <span className="text-[8px] uppercase font-bold text-[#8C8270] dark:text-[#A09685] tracking-wider mt-1 block">Total uploads</span>
               </div>

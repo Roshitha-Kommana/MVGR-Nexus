@@ -330,15 +330,14 @@ export const Home = () => {
         <div className="absolute top-0 right-0 w-36 h-36 bg-white/5 rounded-full blur-2xl pointer-events-none -translate-y-6 translate-x-6" />
         
         <div className="space-y-2.5 z-10 max-w-lg">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/10 border border-white/20 text-[#FBF8F3] text-[9px] font-extrabold uppercase tracking-wider">
-            <Award size={10} className="text-[#FBF8F3] fill-white/15" /> Academic Spotlight
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/10 border border-white/20 text-[#FBF8F3] text-[8.5px] font-heading font-bold uppercase tracking-wider">
+            Academic resources, freely shared
           </div>
-          <h2 className="font-heading font-black text-xl md:text-2xl leading-tight tracking-tight mt-1">
-            Everything You Need to Ace Your Semester <br />
-            <span className="text-[#FBF8F3]/90 font-medium text-xs.5 md:text-sm">Trusted materials uploaded by MVGR faculty, seniors, and students just like you.</span>
+          <h2 className="font-heading font-extrabold text-2xl md:text-3xl leading-tight tracking-tight mt-1">
+            Your library of <span className="font-cursive text-amber-200 text-2xl md:text-3xl font-semibold tracking-normal inline-block normal-case mx-1.5 align-middle">student-made</span> knowledge
           </h2>
-          <p className="text-[10.5px] text-[#EAE5DB]/80 leading-relaxed max-w-md">
-            Access lecture notes, lab manuals, and previous year question papers organized by department and semester. No more searching — just open, read, and learn.
+          <p className="font-body font-light text-[11.5px] text-[#EAE5DB]/90 leading-relaxed max-w-md">
+            Browse thousands of notes, lecture summaries, and study manuals — contributed by students, for students.
           </p>
         </div>
         
@@ -380,7 +379,7 @@ export const Home = () => {
       {isSignedIn && (
         <motion.section variants={itemVariants} className="space-y-4">
           <div className="flex items-center justify-between border-b border-[#E6DFD3] dark:border-[#3A342B]/40 pb-1.5">
-            <h2 className="font-heading font-black text-xs.5 uppercase tracking-wider flex items-center gap-1.5">
+            <h2 className="font-heading font-black text-xs uppercase tracking-wider flex items-center gap-1.5">
               <Sparkles size={14} className="text-[#D4A843] fill-[#D4A843] animate-pulse" /> Popular Releases
             </h2>
             <Link to="/browse?sort=highest_rated" className="text-[10px] font-bold text-[#D4A843] hover:underline flex items-center">
@@ -405,7 +404,7 @@ export const Home = () => {
       {/* 5. Stats Summary Row */}
       <motion.section 
         variants={itemVariants} 
-        className="grid grid-cols-3 gap-3.5 bg-[#EAE5DB]/40 dark:bg-[#2A251D]/20 border border-[#E6DFD3] dark:border-[#3A342B]/40 p-4.5 rounded-2xl"
+        className="grid grid-cols-3 gap-3.5 bg-[#EAE5DB]/40 dark:bg-[#2A251D]/20 border border-[#E6DFD3] dark:border-[#3A342B]/40 p-4 rounded-2xl"
       >
         <div className="text-center flex flex-col items-center">
           <span className="text-lg font-heading font-black text-[#2C2518] dark:text-[#EFECE6]">
@@ -439,7 +438,7 @@ export const Home = () => {
       {isSignedIn && recentMaterials.length > 0 && (
         <motion.section variants={itemVariants} className="space-y-3.5">
           <div className="flex items-center justify-between border-b border-[#E6DFD3] dark:border-[#3A342B]/40 pb-1">
-            <h2 className="font-heading font-black text-xs.5 uppercase tracking-wider text-[#2C2518] dark:text-[#EFECE6]">
+            <h2 className="font-heading font-black text-xs uppercase tracking-wider text-[#2C2518] dark:text-[#EFECE6]">
               Continue Reading
             </h2>
             <Link to="/browse?sort=newest" className="text-[10px] font-bold text-[#D4A843] hover:underline">

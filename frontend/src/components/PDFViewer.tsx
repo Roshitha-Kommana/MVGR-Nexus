@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { ZoomIn, ZoomOut, FileWarning } from 'lucide-react';
 import ElephantLoader from './ElephantLoader.js';
@@ -18,6 +18,27 @@ export const PDFViewer = ({ fileUrl }: PDFViewerProps) => {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [scale, setScale] = useState<number>(1.0);
   const [loadError, setLoadError] = useState<boolean>(false);
+  const [containerWidth, setContainerWidth] = useState<number>(550);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const handleResize = () => {
+      const width = containerRef.current?.getBoundingClientRect().width || 550;
+      // Subtract padding (p-4 is 16px on each side, so 32px total)
+      setContainerWidth(Math.min(width - 32, 550));
+    };
+
+    handleResize();
+    // Add small delay to let container mount and settle layout size
+    const timer = setTimeout(handleResize, 100);
+    
+    window.addEventListener('resize', handleResize);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
     setNumPages(numPages);
@@ -64,7 +85,10 @@ export const PDFViewer = ({ fileUrl }: PDFViewerProps) => {
       </div>
 
       {/* PDF Scroll Canvas */}
-      <div className="flex-1 overflow-y-auto p-4 flex justify-center bg-gray-100 dark:bg-background-dark min-h-[500px]">
+      <div 
+        ref={containerRef}
+        className="flex-1 overflow-y-auto p-4 flex flex-col items-center bg-gray-100 dark:bg-background-dark min-h-[500px]"
+      >
         {loadError ? (
           <div className="flex flex-col items-center justify-center text-red-500 gap-2 p-8 text-center max-w-sm m-auto">
             <FileWarning size={48} />
@@ -85,13 +109,12 @@ export const PDFViewer = ({ fileUrl }: PDFViewerProps) => {
               <div 
                 key={pageNumber} 
                 className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 border border-gray-200 dark:border-gray-800"
-                style={{ transform: `scale(${scale})`, transformOrigin: 'top center' }}
               >
                 <Page
                   pageNumber={pageNumber}
                   renderAnnotationLayer={false}
                   renderTextLayer={false}
-                  width={550}
+                  width={containerWidth * scale}
                   className="max-w-full"
                 />
                 <div className="text-center py-1 bg-gray-50 border-t border-gray-100 text-[10px] text-gray-400 font-semibold select-none">

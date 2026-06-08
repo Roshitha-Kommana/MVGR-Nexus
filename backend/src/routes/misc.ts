@@ -11,18 +11,18 @@ const router = Router();
 router.get('/stats', async (req: Request, res: Response) => {
   try {
     // Total materials
-    const materialsCountResult = await db.select({ count: sql<number>`count(${materials.id})` }).from(materials);
-    const totalMaterials = materialsCountResult[0]?.count || 0;
+    const materialsCountResult = await db.select({ count: sql`count(${materials.id})` }).from(materials);
+    const totalMaterials = Number(materialsCountResult[0]?.count) || 0;
 
     // Total contributors (users with role contributor or admin, or uploader count)
     const contributorsCountResult = await db
-      .select({ count: sql<number>`count(distinct ${materials.uploadedBy})` })
+      .select({ count: sql`count(distinct ${materials.uploadedBy})` })
       .from(materials);
-    const totalContributors = contributorsCountResult[0]?.count || 0;
+    const totalContributors = Number(contributorsCountResult[0]?.count) || 0;
 
     // Total downloads
-    const downloadsSumResult = await db.select({ sum: sql<number>`sum(${materials.downloadCount})` }).from(materials);
-    const totalDownloads = downloadsSumResult[0]?.sum || 0;
+    const downloadsSumResult = await db.select({ sum: sql`sum(${materials.downloadCount})` }).from(materials);
+    const totalDownloads = Number(downloadsSumResult[0]?.sum) || 0;
 
     // Top 5 Contributors
     const topContributors = await db.query.users.findMany({
@@ -173,6 +173,38 @@ router.post('/placement/interview-experiences', requireAuth(), attachUser, async
   } catch (error: any) {
     console.error('Submit experience error:', error);
     return res.status(500).json({ error: 'Internal server error submitting experience.', details: error.message });
+  }
+});
+
+// 6. DELETE /api/placement/interview-experiences/:id -> Delete placement experience
+router.delete('/placement/interview-experiences/:id', requireAuth(), attachUser, async (req: Request, res: Response) => {
+  const dbUser = req.user;
+  const { id } = req.params;
+
+  if (!dbUser) {
+    return res.status(401).json({ error: 'Profile required' });
+  }
+
+  try {
+    const exp = await db.query.interviewExperiences.findFirst({
+      where: eq(interviewExperiences.id, id)
+    });
+
+    if (!exp) {
+      return res.status(404).json({ error: 'Interview experience not found.' });
+    }
+
+    // Allow author or admin to delete
+    if (exp.authorId !== dbUser.id && dbUser.role !== 'admin') {
+      return res.status(403).json({ error: 'Forbidden: You are not authorized to delete this experience.' });
+    }
+
+    await db.delete(interviewExperiences).where(eq(interviewExperiences.id, id));
+
+    return res.json({ message: 'Interview experience deleted successfully.' });
+  } catch (error: any) {
+    console.error('Delete experience error:', error);
+    return res.status(500).json({ error: 'Internal server error deleting experience.', details: error.message });
   }
 });
 

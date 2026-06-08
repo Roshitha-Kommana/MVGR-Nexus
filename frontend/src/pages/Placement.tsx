@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../services/api.js';
 import { Material, InterviewExperience } from '../types/index.js';
 import { MaterialCard } from '../components/MaterialCard.js';
+import { useCurrentUser } from '../hooks/useCurrentUser.js';
 import { 
   Award, 
   Briefcase, 
@@ -17,7 +18,8 @@ import {
   Building,
   User,
   GraduationCap,
-  AlertCircle
+  AlertCircle,
+  Trash2
 } from 'lucide-react';
 import ElephantLoader from '../components/ElephantLoader.js';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
@@ -32,6 +34,7 @@ const TABS = [
 ];
 
 export const Placement = () => {
+  const { dbUser } = useCurrentUser();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('aptitude');
   const [showFormModal, setShowFormModal] = useState(false);
@@ -90,6 +93,24 @@ export const Placement = () => {
       setSubmitError(err.response?.data?.error || 'Failed to submit experience.');
     }
   });
+
+  const deleteExperienceMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await api.delete(`/placement/interview-experiences/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['interviewExperiences'] });
+    },
+    onError: (err: any) => {
+      alert(err.response?.data?.error || 'Failed to delete experience.');
+    }
+  });
+
+  const handleDeleteExperience = (id: string) => {
+    if (confirm('Are you sure you want to delete this placement experience?')) {
+      deleteExperienceMutation.mutate(id);
+    }
+  };
 
   const handleSubmitExperience = (e: React.FormEvent) => {
     e.preventDefault();
@@ -225,9 +246,21 @@ export const Placement = () => {
                     </div>
                   </div>
 
-                  <span className="text-[10px] font-bold text-text-lightMuted dark:text-text-darkMuted">
-                    {new Date(exp.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-bold text-text-lightMuted dark:text-text-darkMuted">
+                      {new Date(exp.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                    </span>
+                    {dbUser && (exp.authorId === dbUser.id || dbUser.role === 'admin') && (
+                      <button
+                        onClick={() => handleDeleteExperience(exp.id)}
+                        disabled={deleteExperienceMutation.isPending}
+                        className="text-text-lightMuted dark:text-text-darkMuted hover:text-red-500 transition-colors p-1 rounded-lg hover:bg-red-50/10"
+                        title="Delete Experience"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Company & Role */}
@@ -245,7 +278,7 @@ export const Placement = () => {
                 </div>
 
                 {/* Experience text */}
-                <p className="text-xs text-text-light/90 dark:text-text-dark/90 leading-relaxed whitespace-pre-wrap pl-1 italic">
+                <p className="font-body font-light text-[12.5px] text-text-light/90 dark:text-text-dark/90 leading-relaxed whitespace-pre-wrap pl-1 italic">
                   "{exp.experience}"
                 </p>
               </div>

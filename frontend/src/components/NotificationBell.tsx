@@ -148,7 +148,7 @@ export const NotificationBell = ({ variant = 'standard' }: NotificationBellProps
                     >
                       {/* Active Blue dot for unread status */}
                       {!notif.isRead && (
-                        <div className="absolute top-4.5 left-1.5 w-1.5 h-1.5 rounded-full bg-primary" />
+                        <div className="absolute top-4 left-1.5 w-1.5 h-1.5 rounded-full bg-primary" />
                       )}
 
                       <div className="flex-1 pl-1.5">

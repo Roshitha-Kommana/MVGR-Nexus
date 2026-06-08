@@ -24,7 +24,14 @@ import TopHeader from './components/TopHeader.js';
 import ElephantLoader from './components/ElephantLoader.js';
 import { ShieldAlert } from 'lucide-react';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 2, // 2 minutes default stale time
+      refetchOnWindowFocus: false, // Disable automatic refetching when browser tab is refocused
+    },
+  },
+});
 
 // 1. Require Auth Gate to redirect unauthenticated users to /login
 const RequireAuth = ({ children }: { children: React.ReactNode }) => {
@@ -91,11 +98,11 @@ const MainLayout = () => {
   const isAuthPage = hideHeader;
 
   return (
-    <div className="min-h-screen bg-[#F5F0E8] dark:bg-[#1E1B15] text-[#2C2518] dark:text-[#EFECE6] flex flex-col md:flex-row transition-colors duration-200">
+    <div className="min-h-screen bg-background dark:bg-background-dark text-text-light dark:text-text-dark flex flex-col md:flex-row transition-colors duration-200">
       {showNav && <Navbar />}
       
       <div className={`flex-1 flex flex-col min-h-screen overflow-x-hidden relative ${showNav ? 'md:pl-64' : ''}`}>
-        {isSignedIn && !hideHeader && <TopHeader />}
+        {!hideHeader && <TopHeader />}
         
         <main className={`flex-1 w-full ${
           isAuthPage

@@ -28,7 +28,7 @@ export const Navbar = () => {
   return (
     <>
       {/* 1. Mobile Bottom Navbar (below md breakpoint) */}
-      <nav className="md:hidden fixed bottom-0 left-0 w-full h-[72px] bg-white dark:bg-[#2A251D] border-t border-[#E6DFD3] dark:border-[#3A342B] shadow-[0_-2px_16px_rgba(212,168,67,0.04)] flex items-center justify-around px-2 z-40 rounded-t-2xl font-body">
+      <nav className="md:hidden fixed bottom-0 left-0 w-full h-[72px] bg-white dark:bg-[#2A251D] border-t border-[#E6DFD3] dark:border-[#3A342B] shadow-[0_-2px_16px_rgba(212, 168, 67,0.04)] flex items-center justify-around px-2 z-40 rounded-t-2xl font-body">
         {/* Home Tab */}
         <NavLink
           to="/"
@@ -63,7 +63,7 @@ export const Navbar = () => {
           <div className="absolute inset-0 bg-[#D4A843]/20 rounded-full blur-sm fab-pulse" />
           <NavLink
             to="/upload"
-            className="relative z-10 flex items-center justify-center w-14 h-14 bg-[#D4A843] hover:bg-[#B58B2F] text-white rounded-full shadow-[0_4px_16px_rgba(212,168,67,0.3)] active:scale-95 transition-all duration-150"
+            className="relative z-10 flex items-center justify-center w-14 h-14 bg-[#D4A843] hover:bg-[#B58B2F] text-white rounded-full shadow-[0_4px_16px_rgba(212, 168, 67,0.3)] active:scale-95 transition-all duration-150"
           >
             <Plus size={24} />
           </NavLink>
@@ -149,7 +149,7 @@ export const Navbar = () => {
                     clsx(
                       "flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-150",
                       isActive
-                        ? "bg-[#D4A843] text-white shadow-[0_4px_16px_rgba(212,168,67,0.15)]"
+                        ? "bg-[#D4A843] text-white shadow-[0_4px_16px_rgba(212, 168, 67,0.15)]"
                         : "text-[#8C8270] dark:text-[#A09685] hover:bg-[#EAE5DB]/40 dark:hover:bg-[#2A251D]/40 hover:text-[#2C2518] dark:hover:text-[#EFECE6]"
                     )
                   }

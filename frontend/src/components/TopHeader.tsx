@@ -7,7 +7,7 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { clsx } from 'clsx';
 
 export const TopHeader = () => {
-  const { dbUser } = useCurrentUser();
+  const { isSignedIn, dbUser } = useCurrentUser();
   const location = useLocation();
 
   const getGreeting = () => {
@@ -38,6 +38,48 @@ export const TopHeader = () => {
       await supabase.auth.signOut();
     }
   };
+
+  if (!isSignedIn) {
+    return (
+      <header className="flex items-center justify-between py-3.5 px-5 bg-background-light/80 dark:bg-background-dark/80 border-b border-background-borderLight dark:border-background-borderDark backdrop-blur-md sticky top-0 z-30 transition-all duration-200">
+        {/* Brand Logo and Title */}
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 shrink-0 flex items-center justify-center">
+            <DotLottieReact
+              src="/logo.lottie"
+              autoplay
+              loop
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-heading font-black text-xs text-text-light dark:text-text-dark leading-none tracking-tight">
+              MVGR Nexus
+            </span>
+            <span className="text-[8px] font-bold text-text-lightMuted dark:text-text-darkMuted tracking-wider uppercase mt-0.5 font-heading">
+              Academic Library
+            </span>
+          </div>
+        </div>
+
+        {/* Auth Actions */}
+        <div className="flex items-center gap-3">
+          <Link
+            to="/login"
+            className="px-4 py-2 text-xs font-bold text-text-light dark:text-text-dark hover:text-primary transition duration-150"
+          >
+            Login
+          </Link>
+          <Link
+            to="/register"
+            className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-xl text-xs font-bold shadow-md shadow-primary/10 transition duration-150"
+          >
+            Sign Up
+          </Link>
+        </div>
+      </header>
+    );
+  }
 
   if (!dbUser) return null;
 
