@@ -4,7 +4,7 @@ import { ZoomIn, ZoomOut, FileWarning } from 'lucide-react';
 import ElephantLoader from './ElephantLoader.js';
 
 // Configure pdfjs worker for react-pdf
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 // CSS fixes for react-pdf text layers
 import 'react-pdf/dist/Page/TextLayer.css';
@@ -18,15 +18,20 @@ export const PDFViewer = ({ fileUrl }: PDFViewerProps) => {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [scale, setScale] = useState<number>(1.0);
   const [loadError, setLoadError] = useState<boolean>(false);
-  const [containerWidth, setContainerWidth] = useState<number>(550);
+  const [containerWidth, setContainerWidth] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      return Math.max(200, Math.min(window.innerWidth - 32, 550));
+    }
+    return 320;
+  });
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
     const handleResize = () => {
-      const width = containerRef.current?.getBoundingClientRect().width || 550;
-      // Subtract padding (p-4 is 16px on each side, so 32px total)
-      setContainerWidth(Math.min(width - 32, 550));
+      const elementWidth = containerRef.current?.getBoundingClientRect().width;
+      // Fallback to window.innerWidth if elementWidth is unavailable, 0, or too small
+      const width = elementWidth && elementWidth > 100 ? elementWidth : window.innerWidth;
+      setContainerWidth(Math.max(200, Math.min(width - 32, 550)));
     };
 
     handleResize();
@@ -87,7 +92,7 @@ export const PDFViewer = ({ fileUrl }: PDFViewerProps) => {
       {/* PDF Scroll Canvas */}
       <div 
         ref={containerRef}
-        className="flex-1 overflow-y-auto p-4 flex flex-col items-center bg-gray-100 dark:bg-background-dark min-h-[500px]"
+        className="flex-1 overflow-y-auto p-4 flex flex-col items-center bg-gray-100 dark:bg-background-dark min-h-0"
       >
         {loadError ? (
           <div className="flex flex-col items-center justify-center text-red-500 gap-2 p-8 text-center max-w-sm m-auto">

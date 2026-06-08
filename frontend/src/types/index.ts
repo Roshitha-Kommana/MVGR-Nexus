@@ -71,7 +71,7 @@ export interface Comment {
 export interface Notification {
   id: string;
   userId: string;
-  type: 'new_material' | 'comment_reply' | 'rating' | 'announcement' | 'comment';
+  type: 'new_material' | 'comment_reply' | 'rating' | 'announcement' | 'comment' | 'bookmark' | 'download';
   message: string;
   link: string | null;
   isRead: boolean;
@@ -115,6 +115,8 @@ export interface InterviewExperience {
   year: number | null;
   experience: string;
   createdAt: string;
+  isDeleted?: boolean;
+  deletedAt?: string | null;
   author: {
     id: string;
     name: string;

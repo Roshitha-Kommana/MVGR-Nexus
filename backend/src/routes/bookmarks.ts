@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import { requireAuth } from '../middleware/requireAuth.js';
 import attachUser from '../middleware/attachUser.js';
 import { db } from '../db/index.js';
-import { savedMaterials, materials } from '../db/schema.js';
+import { savedMaterials, materials, notifications } from '../db/schema.js';
 import { eq, and } from 'drizzle-orm';
 
 const router = Router();
@@ -66,6 +66,17 @@ router.post('/:materialId', requireAuth(), attachUser, async (req: Request, res:
       userId: dbUser.id,
       materialId
     });
+
+    // Notify uploader if someone else bookmarked
+    if (material.uploadedBy && material.uploadedBy !== dbUser.id) {
+      await db.insert(notifications).values({
+        userId: material.uploadedBy,
+        type: 'bookmark',
+        message: `${dbUser.name} bookmarked your material "${material.title}".`,
+        link: `/material/${materialId}`,
+        isRead: false
+      });
+    }
 
     return res.json({ message: 'Material bookmarked successfully.' });
   } catch (error: any) {

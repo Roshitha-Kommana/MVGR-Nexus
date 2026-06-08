@@ -250,7 +250,7 @@ export const Placement = () => {
                     <span className="text-[10px] font-bold text-text-lightMuted dark:text-text-darkMuted">
                       {new Date(exp.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
                     </span>
-                    {dbUser && (exp.authorId === dbUser.id || dbUser.role === 'admin') && (
+                    {dbUser && (exp.authorId === dbUser.id || exp.author?.id === dbUser.id || dbUser.role === 'admin') && (
                       <button
                         onClick={() => handleDeleteExperience(exp.id)}
                         disabled={deleteExperienceMutation.isPending}

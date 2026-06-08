@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { db } from '../db/index.js';
-import { materials, users, ratings, comments } from '../db/schema.js';
+import { materials, users, ratings, comments, notifications } from '../db/schema.js';
 import { eq, and, or, sql, desc, asc, lte, lt, gte, inArray, ilike } from 'drizzle-orm';
 import { getSignedUrlForDownload, getLocalFileBuffer, deleteFromStorage } from '../lib/supabaseStorage.js';
 import path from 'path';
@@ -247,6 +247,18 @@ export const downloadMaterial = async (req: Request, res: Response) => {
       .update(materials)
       .set({ downloadCount: material.downloadCount + 1 })
       .where(eq(materials.id, id));
+
+    // Notify uploader if someone else downloaded
+    const dbUser = req.user;
+    if (dbUser && material.uploadedBy && material.uploadedBy !== dbUser.id) {
+      await db.insert(notifications).values({
+        userId: material.uploadedBy,
+        type: 'download',
+        message: `${dbUser.name} downloaded your material "${material.title}".`,
+        link: `/material/${id}`,
+        isRead: false
+      });
+    }
 
     // Generate pre-signed URL (or local download link)
     const downloadUrl = await getSignedUrlForDownload(material.s3Key);

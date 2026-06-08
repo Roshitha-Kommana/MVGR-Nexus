@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { api } from '../services/api.js';
-import { Material } from '../types/index.js';
+import { Material, InterviewExperience } from '../types/index.js';
 import { useCurrentUser } from '../hooks/useCurrentUser.js';
 import ElephantLoader from '../components/ElephantLoader.js';
 import {
@@ -16,6 +16,7 @@ import {
   X,
   ChevronLeft,
   ShieldAlert,
+  Briefcase,
 } from 'lucide-react';
 
 // Days left until auto-permanent-delete
@@ -123,15 +124,110 @@ const TrashItemCard = ({
   );
 };
 
+const TrashExperienceCard = ({
+  experience,
+  onRestore,
+  onPermanentDelete,
+  isRestoring,
+  isDeleting,
+}: {
+  experience: InterviewExperience;
+  onRestore: (id: string) => void;
+  onPermanentDelete: (id: string) => void;
+  isRestoring: boolean;
+  isDeleting: boolean;
+}) => {
+  const daysLeft = getDaysRemaining(experience.deletedAt ?? null);
+  const urgencyColor =
+    daysLeft <= 3
+      ? 'text-red-500 bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/30'
+      : daysLeft <= 10
+      ? 'text-amber-500 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/30'
+      : 'text-[#8C8270] dark:text-[#A09685] bg-[#F5F0E8] dark:bg-[#1E1B15] border-[#E6DFD3] dark:border-[#3A342B]';
+
+  const deletedDate = experience.deletedAt
+    ? new Date(experience.deletedAt).toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      })
+    : '—';
+
+  return (
+    <div className="group relative bg-white dark:bg-[#2A251D] border border-[#E6DFD3] dark:border-[#3A342B]/60 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200">
+      {daysLeft <= 3 && (
+        <div className="absolute inset-0 rounded-2xl border-2 border-red-400/40 pointer-events-none animate-pulse" />
+      )}
+
+      <div className="flex items-start gap-4">
+        {/* Type icon block */}
+        <div className="w-11 h-11 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 flex items-center justify-center shrink-0">
+          <Briefcase size={18} className="text-amber-500" />
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <h3 className="font-heading font-bold text-sm text-[#2C2518] dark:text-[#EFECE6] leading-tight flex items-center gap-1.5">
+            <span className="font-extrabold">{experience.company}</span>
+            <span className="font-semibold text-xs text-[#8C8270] dark:text-[#A09685]">— {experience.role}</span>
+          </h3>
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            {experience.year && (
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold border border-[#D4A843]/20 bg-[#D4A843]/5 text-[#D4A843] uppercase">
+                Batch of {experience.year}
+              </span>
+            )}
+            <span className="text-[9px] font-bold text-[#8C8270] dark:text-[#A09685] italic line-clamp-1">
+              "{experience.experience.substring(0, 60)}..."
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 mt-2 text-[10px] text-[#8C8270] dark:text-[#A09685] font-bold">
+            <Calendar size={10} />
+            <span>Deleted: {deletedDate}</span>
+          </div>
+        </div>
+
+        {/* Days remaining badge */}
+        <div className={`shrink-0 px-2.5 py-1.5 rounded-xl border text-center ${urgencyColor}`}>
+          <div className="text-sm font-heading font-black leading-none">{daysLeft}</div>
+          <div className="text-[8px] font-bold uppercase mt-0.5 flex items-center gap-0.5 justify-center">
+            <Clock size={7} /> days left
+          </div>
+        </div>
+      </div>
+
+      {/* Action buttons */}
+      <div className="flex gap-2.5 mt-4">
+        <button
+          onClick={() => onRestore(experience.id)}
+          disabled={isRestoring || isDeleting}
+          className="flex-1 py-2.5 px-3 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 font-heading font-bold text-xs transition-all duration-150 flex items-center justify-center gap-1.5 hover:scale-[1.02] disabled:opacity-50"
+        >
+          <RotateCcw size={13} />
+          Restore
+        </button>
+        <button
+          onClick={() => onPermanentDelete(experience.id)}
+          disabled={isRestoring || isDeleting}
+          className="flex-1 py-2.5 px-3 rounded-xl border border-rose-200 dark:border-rose-900/40 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 font-heading font-bold text-xs transition-all duration-150 flex items-center justify-center gap-1.5 hover:scale-[1.02] disabled:opacity-50"
+        >
+          <X size={13} />
+          Delete Forever
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const Trash = () => {
   const { dbUser } = useCurrentUser();
   const queryClient = useQueryClient();
-  const [confirmPermaDelete, setConfirmPermaDelete] = useState<string | null>(null);
-  const [activeAction, setActiveAction] = useState<{ id: string; type: 'restore' | 'delete' } | null>(null);
+  const [confirmPermaDelete, setConfirmPermaDelete] = useState<{ id: string; type: 'material' | 'experience' } | null>(null);
+  const [activeAction, setActiveAction] = useState<{ id: string; type: 'restore' | 'delete'; itemType: 'material' | 'experience' } | null>(null);
 
   // Fetch user's own trashed materials
-  const { data, isLoading, isError } = useQuery<{ materials: Material[] }>({
-    queryKey: ['trash', dbUser?.id],
+  const { data: materialsData, isLoading: isMaterialsLoading, isError: isMaterialsError } = useQuery<{ materials: Material[] }>({
+    queryKey: ['trashMaterials', dbUser?.id],
     queryFn: async () => {
       const res = await api.get('/materials', {
         params: {
@@ -145,52 +241,109 @@ const Trash = () => {
     enabled: !!dbUser,
   });
 
-  // Restore mutation
-  const restoreMutation = useMutation({
+  // Fetch user's own trashed interview experiences
+  const { data: experiencesData, isLoading: isExperiencesLoading, isError: isExperiencesError } = useQuery<{ experiences: InterviewExperience[] }>({
+    queryKey: ['trashExperiences', dbUser?.id],
+    queryFn: async () => {
+      const res = await api.get('/placement/interview-experiences', {
+        params: {
+          showDeleted: 'true',
+          authorId: dbUser?.id,
+        },
+      });
+      return res.data;
+    },
+    enabled: !!dbUser,
+  });
+
+  // Restore mutations
+  const restoreMaterialMutation = useMutation({
     mutationFn: async (id: string) => {
       await api.post(`/materials/${id}/restore`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['trash'] });
+      queryClient.invalidateQueries({ queryKey: ['trashMaterials'] });
       queryClient.invalidateQueries({ queryKey: ['materials'] });
     },
   });
 
-  // Permanent delete mutation
-  const permanentDeleteMutation = useMutation({
+  const restoreExperienceMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await api.post(`/placement/interview-experiences/${id}/restore`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trashExperiences'] });
+      queryClient.invalidateQueries({ queryKey: ['interviewExperiences'] });
+    },
+  });
+
+  // Permanent delete mutations
+  const permanentDeleteMaterialMutation = useMutation({
     mutationFn: async (id: string) => {
       await api.delete(`/materials/${id}/permanent`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['trash'] });
+      queryClient.invalidateQueries({ queryKey: ['trashMaterials'] });
       setConfirmPermaDelete(null);
     },
   });
 
-  const handleRestore = async (id: string) => {
-    setActiveAction({ id, type: 'restore' });
+  const permanentDeleteExperienceMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await api.delete(`/placement/interview-experiences/${id}/permanent`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trashExperiences'] });
+      setConfirmPermaDelete(null);
+    },
+  });
+
+  const handleRestoreMaterial = async (id: string) => {
+    setActiveAction({ id, type: 'restore', itemType: 'material' });
     try {
-      await restoreMutation.mutateAsync(id);
+      await restoreMaterialMutation.mutateAsync(id);
     } finally {
       setActiveAction(null);
     }
   };
 
-  const handlePermanentDelete = (id: string) => {
-    setConfirmPermaDelete(id);
+  const handleRestoreExperience = async (id: string) => {
+    setActiveAction({ id, type: 'restore', itemType: 'experience' });
+    try {
+      await restoreExperienceMutation.mutateAsync(id);
+    } finally {
+      setActiveAction(null);
+    }
+  };
+
+  const handlePermanentDeleteMaterial = (id: string) => {
+    setConfirmPermaDelete({ id, type: 'material' });
+  };
+
+  const handlePermanentDeleteExperience = (id: string) => {
+    setConfirmPermaDelete({ id, type: 'experience' });
   };
 
   const confirmAndDelete = async () => {
     if (!confirmPermaDelete) return;
-    setActiveAction({ id: confirmPermaDelete, type: 'delete' });
+    setActiveAction({ id: confirmPermaDelete.id, type: 'delete', itemType: confirmPermaDelete.type });
     try {
-      await permanentDeleteMutation.mutateAsync(confirmPermaDelete);
+      if (confirmPermaDelete.type === 'material') {
+        await permanentDeleteMaterialMutation.mutateAsync(confirmPermaDelete.id);
+      } else {
+        await permanentDeleteExperienceMutation.mutateAsync(confirmPermaDelete.id);
+      }
     } finally {
       setActiveAction(null);
     }
   };
 
-  const trashedItems = data?.materials ?? [];
+  const trashedMaterials = materialsData?.materials ?? [];
+  const trashedExperiences = experiencesData?.experiences ?? [];
+  const totalTrashedCount = trashedMaterials.length + trashedExperiences.length;
+
+  const isLoading = isMaterialsLoading || isExperiencesLoading;
+  const isError = isMaterialsError || isExperiencesError;
 
   if (isLoading) {
     return <ElephantLoader fullscreen text="Loading Trash..." />;
@@ -240,7 +393,7 @@ const Trash = () => {
       )}
 
       {/* Empty state */}
-      {!isError && trashedItems.length === 0 && (
+      {!isError && totalTrashedCount === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
           <div className="w-16 h-16 rounded-2xl bg-[#F5F0E8] dark:bg-[#2A251D] border border-[#E6DFD3] dark:border-[#3A342B] flex items-center justify-center">
             <Trash2 size={28} className="text-[#8C8270] dark:text-[#A09685] opacity-50" />
@@ -250,7 +403,7 @@ const Trash = () => {
               Trash is Empty
             </p>
             <p className="text-xs text-[#8C8270] dark:text-[#A09685]">
-              Materials you delete will appear here for 30 days before being permanently removed.
+              Materials or placement experiences you delete will appear here for 30 days before being permanently removed.
             </p>
           </div>
           <Link
@@ -262,26 +415,56 @@ const Trash = () => {
         </div>
       )}
 
-      {/* Trashed items grid */}
-      {trashedItems.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
+      {/* Trashed items lists */}
+      {!isError && totalTrashedCount > 0 && (
+        <div className="space-y-8">
+          <div className="flex items-center justify-between border-b border-[#E6DFD3] dark:border-[#3A342B]/40 pb-2">
             <span className="text-xs font-bold text-[#8C8270] dark:text-[#A09685]">
-              {trashedItems.length} item{trashedItems.length !== 1 ? 's' : ''} in Trash
+              {totalTrashedCount} item{totalTrashedCount !== 1 ? 's' : ''} in Trash
             </span>
           </div>
-          <div className="grid gap-3 sm:grid-cols-1">
-            {trashedItems.map((material) => (
-              <TrashItemCard
-                key={material.id}
-                material={material}
-                onRestore={handleRestore}
-                onPermanentDelete={handlePermanentDelete}
-                isRestoring={activeAction?.id === material.id && activeAction?.type === 'restore'}
-                isDeleting={activeAction?.id === material.id && activeAction?.type === 'delete'}
-              />
-            ))}
-          </div>
+
+          {/* 1. Trashed Study Materials */}
+          {trashedMaterials.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="font-heading font-bold text-xs uppercase tracking-wider text-[#8C8270] dark:text-[#A09685] flex items-center gap-1.5">
+                <FileText size={14} className="text-[#D4A843]" /> Trashed Study Materials ({trashedMaterials.length})
+              </h3>
+              <div className="grid gap-3 sm:grid-cols-1">
+                {trashedMaterials.map((material) => (
+                  <TrashItemCard
+                    key={material.id}
+                    material={material}
+                    onRestore={handleRestoreMaterial}
+                    onPermanentDelete={handlePermanentDeleteMaterial}
+                    isRestoring={activeAction?.id === material.id && activeAction?.type === 'restore' && activeAction?.itemType === 'material'}
+                    isDeleting={activeAction?.id === material.id && activeAction?.type === 'delete' && activeAction?.itemType === 'material'}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 2. Trashed Interview Experiences */}
+          {trashedExperiences.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="font-heading font-bold text-xs uppercase tracking-wider text-[#8C8270] dark:text-[#A09685] flex items-center gap-1.5">
+                <Briefcase size={14} className="text-[#D4A843]" /> Trashed Interview Experiences ({trashedExperiences.length})
+              </h3>
+              <div className="grid gap-3 sm:grid-cols-1">
+                {trashedExperiences.map((exp) => (
+                  <TrashExperienceCard
+                    key={exp.id}
+                    experience={exp}
+                    onRestore={handleRestoreExperience}
+                    onPermanentDelete={handlePermanentDeleteExperience}
+                    isRestoring={activeAction?.id === exp.id && activeAction?.type === 'restore' && activeAction?.itemType === 'experience'}
+                    isDeleting={activeAction?.id === exp.id && activeAction?.type === 'delete' && activeAction?.itemType === 'experience'}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -304,23 +487,23 @@ const Trash = () => {
             </div>
 
             <p className="text-xs text-[#8C8270] dark:text-[#A09685] leading-relaxed">
-              This material and its file will be <strong className="text-rose-500">permanently deleted</strong> from storage immediately. You will not be able to recover it.
+              This {confirmPermaDelete.type === 'material' ? 'study material and its file' : 'interview experience'} will be <strong className="text-rose-500">permanently deleted</strong> immediately. You will not be able to recover it.
             </p>
 
             <div className="flex gap-3 pt-1">
               <button
                 onClick={() => setConfirmPermaDelete(null)}
-                disabled={!!activeAction}
+                disabled={activeAction !== null}
                 className="flex-1 py-2.5 px-4 border border-[#E6DFD3] dark:border-[#3A342B] text-[#8C8270] dark:text-[#A09685] rounded-xl font-heading font-bold text-xs hover:bg-[#F5F0E8] dark:hover:bg-[#1E1B15] transition disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmAndDelete}
-                disabled={!!activeAction}
+                disabled={activeAction !== null}
                 className="flex-1 py-2.5 px-4 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-heading font-bold text-xs transition flex items-center justify-center gap-1.5 disabled:opacity-50"
               >
-                {activeAction?.type === 'delete' ? (
+                {activeAction !== null && activeAction.type === 'delete' ? (
                   <>
                     <span className="animate-spin text-white">⟳</span> Deleting...
                   </>

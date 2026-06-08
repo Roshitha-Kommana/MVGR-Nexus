@@ -103,7 +103,13 @@ router.get('/regulations', requireAuth(), attachUser, async (req: Request, res: 
 
 // 4. GET /api/placement/interview-experiences -> List placement experiences
 router.get('/placement/interview-experiences', requireAuth(), attachUser, async (req: Request, res: Response) => {
+  const { showDeleted, authorId } = req.query;
   try {
+    let whereClause = eq(interviewExperiences.isDeleted, showDeleted === 'true');
+    if (authorId) {
+      whereClause = and(whereClause, eq(interviewExperiences.authorId, authorId as string)) as any;
+    }
+
     const list = await db
       .select({
         id: interviewExperiences.id,
@@ -112,6 +118,9 @@ router.get('/placement/interview-experiences', requireAuth(), attachUser, async 
         year: interviewExperiences.year,
         experience: interviewExperiences.experience,
         createdAt: interviewExperiences.createdAt,
+        authorId: interviewExperiences.authorId,
+        isDeleted: interviewExperiences.isDeleted,
+        deletedAt: interviewExperiences.deletedAt,
         author: {
           id: users.id,
           name: users.name,
@@ -122,6 +131,7 @@ router.get('/placement/interview-experiences', requireAuth(), attachUser, async 
       })
       .from(interviewExperiences)
       .innerJoin(users, eq(interviewExperiences.authorId, users.id))
+      .where(whereClause)
       .orderBy(desc(interviewExperiences.createdAt));
 
     return res.json({ experiences: list });
@@ -176,7 +186,7 @@ router.post('/placement/interview-experiences', requireAuth(), attachUser, async
   }
 });
 
-// 6. DELETE /api/placement/interview-experiences/:id -> Delete placement experience
+// 6. DELETE /api/placement/interview-experiences/:id -> Soft delete placement experience (move to trash)
 router.delete('/placement/interview-experiences/:id', requireAuth(), attachUser, async (req: Request, res: Response) => {
   const dbUser = req.user;
   const { id } = req.params;
@@ -199,12 +209,80 @@ router.delete('/placement/interview-experiences/:id', requireAuth(), attachUser,
       return res.status(403).json({ error: 'Forbidden: You are not authorized to delete this experience.' });
     }
 
-    await db.delete(interviewExperiences).where(eq(interviewExperiences.id, id));
+    await db
+      .update(interviewExperiences)
+      .set({ isDeleted: true, deletedAt: new Date() })
+      .where(eq(interviewExperiences.id, id));
 
-    return res.json({ message: 'Interview experience deleted successfully.' });
+    return res.json({ success: true, message: 'Interview experience moved to Trash successfully.' });
   } catch (error: any) {
     console.error('Delete experience error:', error);
     return res.status(500).json({ error: 'Internal server error deleting experience.', details: error.message });
+  }
+});
+
+// 7. POST /api/placement/interview-experiences/:id/restore -> Restore placement experience
+router.post('/placement/interview-experiences/:id/restore', requireAuth(), attachUser, async (req: Request, res: Response) => {
+  const dbUser = req.user;
+  const { id } = req.params;
+
+  if (!dbUser) {
+    return res.status(401).json({ error: 'Profile required' });
+  }
+
+  try {
+    const exp = await db.query.interviewExperiences.findFirst({
+      where: eq(interviewExperiences.id, id)
+    });
+
+    if (!exp) {
+      return res.status(404).json({ error: 'Interview experience not found.' });
+    }
+
+    if (exp.authorId !== dbUser.id && dbUser.role !== 'admin') {
+      return res.status(403).json({ error: 'Forbidden: You are not authorized to restore this experience.' });
+    }
+
+    await db
+      .update(interviewExperiences)
+      .set({ isDeleted: false, deletedAt: null })
+      .where(eq(interviewExperiences.id, id));
+
+    return res.json({ success: true, message: 'Interview experience restored successfully.' });
+  } catch (error: any) {
+    console.error('Restore experience error:', error);
+    return res.status(500).json({ error: 'Internal server error restoring experience.', details: error.message });
+  }
+});
+
+// 8. DELETE /api/placement/interview-experiences/:id/permanent -> Permanently delete placement experience
+router.delete('/placement/interview-experiences/:id/permanent', requireAuth(), attachUser, async (req: Request, res: Response) => {
+  const dbUser = req.user;
+  const { id } = req.params;
+
+  if (!dbUser) {
+    return res.status(401).json({ error: 'Profile required' });
+  }
+
+  try {
+    const exp = await db.query.interviewExperiences.findFirst({
+      where: eq(interviewExperiences.id, id)
+    });
+
+    if (!exp) {
+      return res.status(404).json({ error: 'Interview experience not found.' });
+    }
+
+    if (exp.authorId !== dbUser.id && dbUser.role !== 'admin') {
+      return res.status(403).json({ error: 'Forbidden: You are not authorized to permanently delete this experience.' });
+    }
+
+    await db.delete(interviewExperiences).where(eq(interviewExperiences.id, id));
+
+    return res.json({ success: true, message: 'Interview experience permanently deleted.' });
+  } catch (error: any) {
+    console.error('Permanent delete experience error:', error);
+    return res.status(500).json({ error: 'Internal server error permanently deleting experience.', details: error.message });
   }
 });
 

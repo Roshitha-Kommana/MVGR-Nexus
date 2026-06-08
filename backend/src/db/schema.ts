@@ -150,6 +150,8 @@ export const interviewExperiences = pgTable('interview_experiences', {
   role: text('role').notNull(),
   year: integer('year'),
   experience: text('experience').notNull(),
+  isDeleted: boolean('is_deleted').default(false).notNull(),
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull()
 });
 

@@ -41,7 +41,12 @@ router.get('/materials/:id/comments', requireAuth(), attachUser, async (req: Req
       })
       .from(comments)
       .innerJoin(users, eq(comments.authorId, users.id))
-      .where(eq(comments.materialId, materialId))
+      .where(
+        and(
+          eq(comments.materialId, materialId),
+          eq(comments.isDeleted, false)
+        )
+      )
       .orderBy(asc(comments.createdAt));
 
     // Structure into threads: top-level comments and their replies
@@ -183,16 +188,12 @@ router.delete('/comments/:id', requireAuth(), attachUser, async (req: Request, r
       return res.status(403).json({ error: 'Forbidden: You cannot delete this comment.' });
     }
 
-    // Soft delete: set text to "This comment was deleted" and isDeleted to true
+    // Hard delete: completely remove comment from database
     await db
-      .update(comments)
-      .set({
-        isDeleted: true,
-        text: 'This comment has been deleted.'
-      })
+      .delete(comments)
       .where(eq(comments.id, id));
 
-    return res.json({ success: true, message: 'Comment soft-deleted.' });
+    return res.json({ success: true, message: 'Comment deleted successfully.' });
   } catch (error: any) {
     console.error('Delete comment error:', error);
     return res.status(500).json({ error: 'Internal server error deleting comment.', details: error.message });
